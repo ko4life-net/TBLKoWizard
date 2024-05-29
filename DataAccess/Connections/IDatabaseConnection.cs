@@ -15,6 +15,9 @@ namespace KoTblDbImporter.DataAccess.Connections
         bool CreateVersionTable();
         bool CreateVersionEntry(int clientVersion);
         DataTable GetVersionEntry();
+        string MapDataTypeToString(Type dataType);
+        string GenerateCreateTableQuery(DataTable table, string tableName);
+        string GenerateInsertQuery(string tableName, DataRow row);
 
     }
 }
