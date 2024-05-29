@@ -88,7 +88,7 @@ namespace KoTblDbImporter.Utlis
 
         private void ImportData(DataSet tblDatabase)
         {
-            Console.BackgroundColor = ConsoleColor.DarkGreen;
+            Console.BackgroundColor = ConsoleColor.Green;
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine("Creating tables for tbl files and importing data...");
             Console.ResetColor();
@@ -101,6 +101,18 @@ namespace KoTblDbImporter.Utlis
                 CreateTableAndImportData(table, tableIndex, tableCount);
                 tableIndex++;
             }
+
+            Console.BackgroundColor = ConsoleColor.Green;
+            Console.ForegroundColor = ConsoleColor.White;
+
+            string text = "Import complete.";
+            int frameWidth = text.Length + 2;
+
+            Console.WriteLine("╔" + new string('═', frameWidth) + "╗");
+            Console.WriteLine("║ " + text + " ║");
+            Console.WriteLine("╚" + new string('═', frameWidth) + "╝");
+            Console.ResetColor();
+
         }
 
         private void CreateTableAndImportData(DataTable table, int tableIndex, int tableCount)

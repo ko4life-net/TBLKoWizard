@@ -50,7 +50,7 @@ namespace KoTblDbImporter.DataAccess.Connections.ODBC
                 if (_connection != null && _connection.State == System.Data.ConnectionState.Open)
                 {
                     _connection.Close();
-                    Console.BackgroundColor = ConsoleColor.DarkGreen;
+                    Console.BackgroundColor = ConsoleColor.Green;
                     Console.ForegroundColor = ConsoleColor.White;
                     Console.WriteLine("Disconnected from the database using ODBC.");
                     Console.ResetColor();

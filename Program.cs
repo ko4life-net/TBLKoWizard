@@ -97,6 +97,8 @@ namespace KoTblDbImporter
                             DataImporter dataImporter = new DataImporter(clientVersion, databaseConnection);
                             dataImporter.ImportDataFromDirectory();
 
+                            databaseConnection.Disconnect();
+
                             break;
                         }
                         else

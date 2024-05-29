@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using KoTblDbImporter.Encryption.V1;
 
 namespace KoTblDbImporter.Encryption
 {
@@ -12,8 +9,7 @@ namespace KoTblDbImporter.Encryption
         {
             if (version <= 1400)
             {
-                throw new ArgumentException("The implementation of this encryption has not been developed yet.");
-                //return new EncryptionKOStandardV1();
+                return new EncryptionKOStandardV1();
             }
             else if (version <= 1800)
             {
