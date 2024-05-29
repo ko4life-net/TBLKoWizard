@@ -115,7 +115,7 @@ namespace KoTblDbImporter.Utlis
             var dbName = Console.ReadLine();
             if (string.IsNullOrWhiteSpace(dbName))
             {
-                dbName = "kodb";
+                dbName = "kodb_tbl";
             }
 
             var username = "";

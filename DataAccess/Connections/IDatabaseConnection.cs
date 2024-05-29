@@ -12,6 +12,7 @@ namespace KoTblDbImporter.DataAccess.Connections
         bool CreateDatabase(string databaseName);
         bool DatabaseExists(string databaseName);
         bool DropAllTables(string databaseName);
+        bool TableVersionExists();
         bool CreateVersionTable();
         bool CreateVersionEntry(int clientVersion);
         DataTable GetVersionEntry();

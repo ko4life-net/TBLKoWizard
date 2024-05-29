@@ -16,7 +16,7 @@ namespace KoTblDbImporter.DataAccess.Connections.ODBC
         {
             try
             {
-                string connectionString = $"Driver={{SQL Server}};Server={(string.IsNullOrEmpty(server) ? "localhost\\sqlexpress" : server)};Database={(string.IsNullOrEmpty(dbName) ? "kodb" : dbName)};";
+                string connectionString = $"Driver={{SQL Server}};Server={(string.IsNullOrEmpty(server) ? "localhost\\sqlexpress" : server)};Database={(string.IsNullOrEmpty(dbName) ? "kodb_tbl" : dbName)};";
                 _connection = new OdbcConnection(connectionString);
                 _connection.Open();
                 Console.BackgroundColor = ConsoleColor.DarkGreen;
@@ -75,6 +75,11 @@ namespace KoTblDbImporter.DataAccess.Connections.ODBC
         {
             try
             {
+                if (_connection.State != ConnectionState.Open)
+                {
+                    _connection.Open();
+                }
+
                 using (OdbcCommand command = new OdbcCommand(sql, _connection))
                 {
                     command.ExecuteNonQuery();
@@ -115,7 +120,29 @@ namespace KoTblDbImporter.DataAccess.Connections.ODBC
         public bool CreateDatabase(string databaseName)
         {
             string sql = $"CREATE DATABASE [{databaseName}]";
-            ExecuteQuery(sql, $"Database '{databaseName}' created successfully.");
+            try
+            {
+                using (OdbcCommand command = new OdbcCommand(sql, _connection))
+                {
+                    command.ExecuteNonQuery();
+                    return true;
+                }
+            }
+            catch (OdbcException ex)
+            {
+                Console.BackgroundColor = ConsoleColor.Red;
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.WriteLine($"Error creating database '{databaseName}': {ex.Message}");
+                Console.ResetColor();
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine($"Unexpected error: {ex.Message}");
+                Console.ResetColor();
+                return false;
+            }
 
             return true;
         }
@@ -144,6 +171,8 @@ namespace KoTblDbImporter.DataAccess.Connections.ODBC
                 }
 
                 DataTable tables = _connection.GetSchema("Tables");
+                ProgressBar progressBar = new ProgressBar(0, tables.Rows.Count-2, additionalInfo: "Processing... ");
+                int i = 1;
 
                 foreach (DataRow row in tables.Rows)
                 {
@@ -153,13 +182,11 @@ namespace KoTblDbImporter.DataAccess.Connections.ODBC
                         continue;
 
                     string dropTableSql = $"DROP TABLE [{tableName}]";
-                    ExecuteQuery(dropTableSql, $"Table '{tableName}' dropped successfully.");
-
+                    ExecuteQuery(dropTableSql, $"Table '{tableName}' {i} of {tables.Rows.Count-2} was dropped successfully.");
+                    progressBar.Update(i);
+                    i++;
                 }
-                Console.BackgroundColor = ConsoleColor.DarkGreen;
-                Console.ForegroundColor = ConsoleColor.White;
-                Console.WriteLine($"All tables in database '{databaseName}' dropped successfully.");
-                Console.ResetColor();
+
                 return true;
             }
             catch (OdbcException ex)
@@ -167,6 +194,34 @@ namespace KoTblDbImporter.DataAccess.Connections.ODBC
                 Console.BackgroundColor = ConsoleColor.Red;
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine($"Error dropping tables: {ex.Message}");
+                Console.ResetColor();
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine($"Unexpected error: {ex.Message}");
+                Console.ResetColor();
+                return false;
+            }
+        }
+        public bool TableVersionExists()
+        {
+            string sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '_VERSION'";
+
+            try
+            {
+                using (OdbcCommand command = new OdbcCommand(sql, _connection))
+                {
+                    int count = (int)command.ExecuteScalar();
+                    return count > 0;
+                }
+            }
+            catch (OdbcException ex)
+            {
+                Console.BackgroundColor = ConsoleColor.Red;
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.WriteLine($"Error checking if '_VERSION' table exists: {ex.Message}");
                 Console.ResetColor();
                 return false;
             }
