@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using KoTblDbImporter.DataAccess.Connections;
+using KoTblDbImporter.DataAccess.Factories;
 using KoTblDbImporter.Utlis;
 
 namespace KoTblDbImporter
@@ -20,6 +22,18 @@ namespace KoTblDbImporter
 
                 var settings = ConfigurationHelper.LoadConnectionSettings(configFile);
 
+                IDatabaseConnectionFactory connectionFactory = new DatabaseConnectionFactory();
+                IDatabaseConnection databaseConnection = connectionFactory.GetDatabaseConnection(settings.ConnectionMethod);
+                databaseConnection.Connect(settings.Server, settings.DbName, settings.Username, settings.Password);
+
+
+            }
+            catch (System.NotImplementedException ex)
+            {
+                Console.BackgroundColor = ConsoleColor.Red;
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.WriteLine($"Error connecting to the database: {ex.Message}");
+                Console.ResetColor();
             }
             catch (Exception ex)
             {
