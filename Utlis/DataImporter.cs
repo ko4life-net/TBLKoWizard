@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using KoTblDbImporter.Encryption;
 using System.Formats.Tar;
+using System.Reflection.Metadata.Ecma335;
 
 namespace KoTblDbImporter.Utlis
 {
@@ -35,10 +36,15 @@ namespace KoTblDbImporter.Utlis
                     _logger.LogEvent($"Data folder path set to {clientDataLocation}.", LogLevel.Info);
 
                     var tblDatabase = LoadEncryptedData(clientDataLocation);
+                    var tblDatabaseColumnsMapped = tblDatabase;
 
-                    if (tblDatabase != null)
+                    string configFilePath = "ColumnMappingsConfig.json";
+                    ColumnMapping columnMapping = ColumnMappingHelper.LoadMappings(configFilePath);
+                    tblDatabaseColumnsMapped = ColumnMappingHelper.ApplyColumnMappings(tblDatabase, columnMapping.Mappings, _clientVersion, _logger);
+
+                    if (tblDatabaseColumnsMapped != null)
                     {
-                        ImportData(tblDatabase);
+                        ImportData(tblDatabaseColumnsMapped);
                     } else
                     {
                         _logger.LogEvent("Decrypted data was empty. Decryption error.", LogLevel.Error);

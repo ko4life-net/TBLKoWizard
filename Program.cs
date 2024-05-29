@@ -61,7 +61,7 @@ namespace KoTblDbImporter
                         Console.ForegroundColor = ConsoleColor.Red;
                         Console.WriteLine($"Data entries from tbl files already exist in the database, for version {versionID}, created on {createdAt}.");
                         Console.ResetColor();
-                        _logger.LogEvent("Data entries from tbl files already exist in the database, for version {versionID}, created on {createdAt}.", LogLevel.Warning);
+                        _logger.LogEvent($"Data entries from tbl files already exist in the database, for version {versionID}, created on {createdAt}.", LogLevel.Warning);
 
                         while (true)
                         {

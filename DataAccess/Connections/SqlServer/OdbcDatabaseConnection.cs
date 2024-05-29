@@ -337,7 +337,7 @@ namespace KoTblDbImporter.DataAccess.Connections.ODBC
 
             foreach (DataColumn column in table.Columns)
             {
-                string columnName = "col_" + column.ColumnName;
+                string columnName = "" + column.ColumnName;
                 Type dataType = column.DataType;
                 string sqlType = MapDataTypeToString(dataType);
 
@@ -358,7 +358,7 @@ namespace KoTblDbImporter.DataAccess.Connections.ODBC
 
             foreach (DataColumn column in row.Table.Columns)
             {
-                columns.Add($"col_{column.ColumnName}");
+                columns.Add($"{column.ColumnName}");
 
                 var item = row[column];
 
