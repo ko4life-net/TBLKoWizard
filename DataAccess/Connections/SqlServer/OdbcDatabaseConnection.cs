@@ -243,6 +243,7 @@ namespace KoTblDbImporter.DataAccess.Connections.ODBC
         public bool CreateVersionEntry(int clientVersion)
         {
             string sql = $"INSERT INTO _VERSION (VersionID) VALUES ({clientVersion});";
+            Console.WriteLine();
             ExecuteQuery(sql, $"The entry with client version has been created in the _VERSION table.");
 
             return true;

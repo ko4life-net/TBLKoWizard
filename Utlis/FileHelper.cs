@@ -14,7 +14,7 @@ namespace KoTblDbImporter.Utlis
         }
         public static string[] GetTblFileNames(string path)
         {
-            string fullPath = Path.Combine(path, "data");
+            string fullPath = Path.Combine(path);
 
             if (DirectoryExists(fullPath))
             {

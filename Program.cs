@@ -86,7 +86,17 @@ namespace KoTblDbImporter
 
                         if (int.TryParse(input, out clientVersion) && clientVersion > 0)
                         {
+                            if (!databaseConnection.TableVersionExists())
+                            {
+                                databaseConnection.CreateVersionTable();
+                            }
+
                             databaseConnection.CreateVersionEntry(clientVersion);
+
+                            //Enter Client Data Path and LoadData
+                            DataImporter dataImporter = new DataImporter(clientVersion, databaseConnection);
+                            dataImporter.ImportDataFromDirectory();
+
                             break;
                         }
                         else
@@ -98,8 +108,6 @@ namespace KoTblDbImporter
                         }
                     }
                 }
-
-
             }
             catch (System.NotImplementedException ex)
             {
