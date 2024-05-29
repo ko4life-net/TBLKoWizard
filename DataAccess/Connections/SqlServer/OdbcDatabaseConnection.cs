@@ -10,9 +10,9 @@ namespace KoTblDbImporter.DataAccess.Connections.ODBC
 {
     public class OdbcDatabaseConnection : IDatabaseConnection
     {
-        private OdbcConnection _connection;
+        private OdbcConnection? _connection;
 
-        public bool Connect(string server = "", string dbName = "", string username = null, string password = null)
+        public bool Connect(string server = "", string dbName = "", string username = "", string password = "")
         {
             try
             {
@@ -52,7 +52,7 @@ namespace KoTblDbImporter.DataAccess.Connections.ODBC
                     _connection.Close();
                     Console.BackgroundColor = ConsoleColor.Green;
                     Console.ForegroundColor = ConsoleColor.White;
-                    Console.WriteLine("Disconnected from the database using ODBC.");
+                    Console.WriteLine("Disconnected from the database.");
                     Console.ResetColor();
                 }
             }
@@ -75,7 +75,7 @@ namespace KoTblDbImporter.DataAccess.Connections.ODBC
         {
             try
             {
-                if (_connection.State != ConnectionState.Open)
+                if (_connection != null && _connection.State != ConnectionState.Open)
                 {
                     _connection.Open();
                 }
@@ -143,51 +143,62 @@ namespace KoTblDbImporter.DataAccess.Connections.ODBC
                 Console.ResetColor();
                 return false;
             }
-
-            return true;
         }
 
         public bool DatabaseExists(string databaseName)
         {
             string sql = $"SELECT COUNT(*) FROM sys.databases WHERE name = '{databaseName}'";
 
-            using (OdbcCommand command = _connection.CreateCommand())
+            if (_connection != null)
             {
-                command.CommandText = sql;
-                int databaseCount = (int)command.ExecuteScalar();
-                bool databaseExists = databaseCount > 0;
+                using (OdbcCommand command = _connection.CreateCommand())
+                {
+                    command.CommandText = sql;
+                    int databaseCount = Convert.ToInt32(command.ExecuteScalar());
+                    bool databaseExists = databaseCount > 0;
 
-                return databaseExists;
+                    return databaseExists;
+                }
             }
+
+            return false;
         }
 
         public bool DropAllTables(string databaseName)
         {
             try
             {
-                if (_connection.State != ConnectionState.Open)
+                if (_connection != null)
                 {
-                    _connection.Open();
+                    if (_connection.State != ConnectionState.Open)
+                    {
+                        _connection.Open();
+                    }
+
+                    DataTable tables = _connection.GetSchema("Tables");
+                    ProgressBar progressBar = new ProgressBar(0, tables.Rows.Count - 2, additionalInfo: "Processing... ");
+                    int i = 1;
+
+                    foreach (DataRow row in tables.Rows)
+                    {
+                        string? tableName = row["TABLE_NAME"].ToString();
+
+                        if (tableName != null) { 
+                            if (tableName.StartsWith("sys") || tableName == "trace_xe_action_map" || tableName == "trace_xe_event_map")
+                                continue;
+
+                            string dropTableSql = $"DROP TABLE [{tableName}]";
+                            ExecuteQuery(dropTableSql, $"Table '{tableName}' {i} of {tables.Rows.Count - 2} was dropped successfully.");
+
+                        }
+                        progressBar.Update(i);
+                        i++;
+                    }
+
+                    return true;
                 }
 
-                DataTable tables = _connection.GetSchema("Tables");
-                ProgressBar progressBar = new ProgressBar(0, tables.Rows.Count-2, additionalInfo: "Processing... ");
-                int i = 1;
-
-                foreach (DataRow row in tables.Rows)
-                {
-                    string tableName = row["TABLE_NAME"].ToString();
-
-                    if (tableName.StartsWith("sys") || tableName == "trace_xe_action_map" || tableName == "trace_xe_event_map")
-                        continue;
-
-                    string dropTableSql = $"DROP TABLE [{tableName}]";
-                    ExecuteQuery(dropTableSql, $"Table '{tableName}' {i} of {tables.Rows.Count-2} was dropped successfully.");
-                    progressBar.Update(i);
-                    i++;
-                }
-
-                return true;
+                return false;
             }
             catch (OdbcException ex)
             {
@@ -213,7 +224,7 @@ namespace KoTblDbImporter.DataAccess.Connections.ODBC
             {
                 using (OdbcCommand command = new OdbcCommand(sql, _connection))
                 {
-                    int count = (int)command.ExecuteScalar();
+                    int count = Convert.ToInt32(command.ExecuteScalar());
                     return count > 0;
                 }
             }
@@ -250,18 +261,21 @@ namespace KoTblDbImporter.DataAccess.Connections.ODBC
         }
         public DataTable GetVersionEntry()
         {
-            string sql = "SELECT * FROM _VERSION";
-
-            using (OdbcCommand command = _connection.CreateCommand())
-            {
-                command.CommandText = sql;
-                using (DbDataReader reader = command.ExecuteReader())
+            if(_connection != null) { 
+                string sql = "SELECT * FROM _VERSION";
+                using (OdbcCommand command = _connection.CreateCommand())
                 {
-                    DataTable dataTable = new DataTable();
-                    dataTable.Load(reader);
-                    return dataTable;
+                    command.CommandText = sql;
+                    using (DbDataReader reader = command.ExecuteReader())
+                    {
+                        DataTable dataTable = new DataTable();
+                        dataTable.Load(reader);
+                        return dataTable;
+                    }
                 }
             }
+
+            return new DataTable(); 
         }
 
         public string MapDataTypeToString(Type dataType)
@@ -319,7 +333,7 @@ namespace KoTblDbImporter.DataAccess.Connections.ODBC
 
                 var item = row[column];
 
-                string value;
+                string? value;
                 if (item is string)
                 {
                     value = $"'{((string)item).Replace("'", "''")}'";
@@ -333,7 +347,7 @@ namespace KoTblDbImporter.DataAccess.Connections.ODBC
                     value = item.ToString();
                 }
 
-                values.Add(value);
+                values.Add(value!);
             }
 
             insertQuery.Append(string.Join(", ", columns));
