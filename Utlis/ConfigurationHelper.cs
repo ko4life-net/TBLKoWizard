@@ -86,7 +86,7 @@ namespace KoTblDbImporter.Utlis
             Console.Write("Enter the database type (SqlServer or MySql):  ");
             Console.WriteLine("(Default is SqlServer)");
 
-            string userInput = Console.ReadLine();
+            string? userInput = Console.ReadLine();
             DatabaseType connectionMethod = DatabaseType.SqlServer;
 
             if (!string.IsNullOrEmpty(userInput))
@@ -118,8 +118,8 @@ namespace KoTblDbImporter.Utlis
                 dbName = "kodb_tbl";
             }
 
-            var username = "";
-            var password = "";
+            string? username = "";
+            string? password = "";
 
             if (!connectionMethod.Equals(DatabaseType.SqlServer))
             {
@@ -129,7 +129,7 @@ namespace KoTblDbImporter.Utlis
                 username = Console.ReadLine();
                 if (string.IsNullOrWhiteSpace(username))
                 {
-                    server = "kodb_user";
+                    username = "kodb_user";
                 }
                 Console.WriteLine();
                 Console.Write("Enter the password: ");
@@ -137,7 +137,7 @@ namespace KoTblDbImporter.Utlis
                 password = Console.ReadLine();
                 if (string.IsNullOrWhiteSpace(password))
                 {
-                    server = "kodb_user";
+                    password = "kodb_user";
                 }
             }
 

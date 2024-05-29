@@ -11,7 +11,6 @@ namespace KoTblDbImporter.Utlis
         private int _minValue;
         private int _maxValue;
         private int _progressWidth;
-        private string _animationFrames;
         private string _additionalInfo;
 
         public ProgressBar(int minValue, int maxValue, int progressWidth = 90, string additionalInfo = "")

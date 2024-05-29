@@ -1,6 +1,4 @@
-﻿using System.Data;
-using System.IO;
-using System.Data;
+﻿using System.IO;
 using System.Text;
 using System.Globalization;
 

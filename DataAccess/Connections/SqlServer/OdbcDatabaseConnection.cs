@@ -5,12 +5,19 @@ using System.Data.Odbc;
 using KoTblDbImporter.DataAccess.Connections;
 using KoTblDbImporter.Utlis;
 using System.Text;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace KoTblDbImporter.DataAccess.Connections.ODBC
 {
     public class OdbcDatabaseConnection : IDatabaseConnection
     {
         private OdbcConnection? _connection;
+        private readonly EventLogger _logger;
+
+        public OdbcDatabaseConnection(EventLogger logger)
+        {
+            this._logger = logger;
+        }
 
         public bool Connect(string server = "", string dbName = "", string username = "", string password = "")
         {
@@ -23,6 +30,7 @@ namespace KoTblDbImporter.DataAccess.Connections.ODBC
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine("Connected to the database using SqlServer.");
                 Console.ResetColor();
+                _logger.LogEvent("Connected to SQL Server.", LogLevel.Info);
 
                 return true;
             }
@@ -31,6 +39,7 @@ namespace KoTblDbImporter.DataAccess.Connections.ODBC
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine($"Error connecting to the database: {ex.Message}");
                 Console.ResetColor();
+                _logger.LogEvent($"Error connecting to the database: {ex.Message}", LogLevel.Error);
 
                 return false;
             }
@@ -39,6 +48,7 @@ namespace KoTblDbImporter.DataAccess.Connections.ODBC
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine($"Unexpected error: {ex.Message}");
                 Console.ResetColor();
+                _logger.LogEvent($"Unexpected error:: {ex.Message}", LogLevel.Error);
 
                 return false;
             }
@@ -54,6 +64,7 @@ namespace KoTblDbImporter.DataAccess.Connections.ODBC
                     Console.ForegroundColor = ConsoleColor.White;
                     Console.WriteLine("Disconnected from the database.");
                     Console.ResetColor();
+                    _logger.LogEvent("Disconnected from the database.", LogLevel.Info);
                 }
             }
             catch (OdbcException ex)
@@ -62,12 +73,14 @@ namespace KoTblDbImporter.DataAccess.Connections.ODBC
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine($"Error disconnecting from the database: {ex.Message}");
                 Console.ResetColor();
+                _logger.LogEvent($"Error disconnecting from the database: {ex.Message}", LogLevel.Error);
             }
             catch (Exception ex)
             {
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine($"Unexpected error: {ex.Message}");
                 Console.ResetColor();
+                _logger.LogEvent($"Unexpected error: {ex.Message}", LogLevel.Error);
             }
         }
 
@@ -86,18 +99,20 @@ namespace KoTblDbImporter.DataAccess.Connections.ODBC
                     Console.ForegroundColor = color;
                     Console.WriteLine($"{comment}");
                     Console.ResetColor();
+                    _logger.LogEvent($"{comment}", LogLevel.Info);
                 }
             }
             catch (OdbcException ex)
             {
-                
                 if (ex.Errors.Count > 0)
                 {
+                    
                     Console.ForegroundColor = ConsoleColor.Red;
                     foreach (OdbcError error in ex.Errors)
                     {
                         Console.WriteLine($"SQL Error {error.SQLState}: {error.Message}");
-                        
+                        _logger.LogEvent($"SQL Error {error.SQLState}: {error.Message}", LogLevel.Error);
+
                     }
                     Console.ResetColor();
                 }
@@ -106,6 +121,7 @@ namespace KoTblDbImporter.DataAccess.Connections.ODBC
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine($"ODBC Error: {ex.Message}");
                     Console.ResetColor();
+                    _logger.LogEvent($"ODBC Error: {ex.Message}", LogLevel.Error);
                 }
                 
             }
@@ -114,6 +130,7 @@ namespace KoTblDbImporter.DataAccess.Connections.ODBC
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine($"Unexpected error: {ex.Message}");
                 Console.ResetColor();
+                _logger.LogEvent($"Unexpected error: {ex.Message}", LogLevel.Error);
             }
         }
 
@@ -125,22 +142,31 @@ namespace KoTblDbImporter.DataAccess.Connections.ODBC
                 using (OdbcCommand command = new OdbcCommand(sql, _connection))
                 {
                     command.ExecuteNonQuery();
+                    _logger.LogEvent($"Database {databaseName} created successfully.", LogLevel.Info);
+
                     return true;
                 }
             }
             catch (OdbcException ex)
             {
+                string errorMessage = ex.Message;
+
                 Console.BackgroundColor = ConsoleColor.Red;
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine($"Error creating database '{databaseName}': {ex.Message}");
                 Console.ResetColor();
+                _logger.LogEvent($"Error creating database '{databaseName}': {errorMessage}", LogLevel.Error);
+
                 return false;
             }
             catch (Exception ex)
             {
+                string errorMessage = ex.Message;
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine($"Unexpected error: {ex.Message}");
                 Console.ResetColor();
+                _logger.LogEvent($"Unexpected error: {errorMessage}", LogLevel.Error);
+
                 return false;
             }
         }
@@ -206,6 +232,7 @@ namespace KoTblDbImporter.DataAccess.Connections.ODBC
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine($"Error dropping tables: {ex.Message}");
                 Console.ResetColor();
+                _logger.LogEvent($"Error dropping tables: {ex.Message}", LogLevel.Error);
                 return false;
             }
             catch (Exception ex)
@@ -213,6 +240,7 @@ namespace KoTblDbImporter.DataAccess.Connections.ODBC
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine($"Unexpected error: {ex.Message}");
                 Console.ResetColor();
+                _logger.LogEvent($"Unexpected error: {ex.Message}", LogLevel.Error);
                 return false;
             }
         }
@@ -298,6 +326,7 @@ namespace KoTblDbImporter.DataAccess.Connections.ODBC
             }
             else
             {
+                _logger.LogEvent($"Data type {dataType} not supported.", LogLevel.Error);
                 throw new NotSupportedException($"Data type {dataType} not supported.");
             }
         }

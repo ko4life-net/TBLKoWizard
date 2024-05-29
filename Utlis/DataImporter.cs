@@ -11,11 +11,13 @@ namespace KoTblDbImporter.Utlis
     {
         private readonly int _clientVersion;
         private readonly IDatabaseConnection _connection;
+        private readonly EventLogger _logger;
 
-        public DataImporter(int clientVersion, IDatabaseConnection connection)
+        public DataImporter(int clientVersion, IDatabaseConnection connection, EventLogger logger)
         {
             _clientVersion = clientVersion;
             _connection = connection;
+            _logger = logger;
         }
 
         public void ImportDataFromDirectory()
@@ -26,15 +28,20 @@ namespace KoTblDbImporter.Utlis
                 Console.ForegroundColor = ConsoleColor.Cyan;
                 Console.WriteLine("Please enter the client data location, e.g., C:\\KnightOnline\\Data");
                 Console.ResetColor();
-                string clientLocation = Console.ReadLine();
+                string? clientDataLocation = Console.ReadLine();
 
-                if (FileHelper.DirectoryExists(clientLocation))
+                if (!string.IsNullOrEmpty(clientDataLocation) && FileHelper.DirectoryExists(clientDataLocation))
                 {
-                    var tblDatabase = LoadEncryptedData(clientLocation);
+                    _logger.LogEvent($"Data folder path set to {clientDataLocation}.", LogLevel.Info);
+
+                    var tblDatabase = LoadEncryptedData(clientDataLocation);
 
                     if (tblDatabase != null)
                     {
                         ImportData(tblDatabase);
+                    } else
+                    {
+                        _logger.LogEvent("Decrypted data was empty. Decryption error.", LogLevel.Error);
                     }
 
                     break;
@@ -58,8 +65,12 @@ namespace KoTblDbImporter.Utlis
                 Console.BackgroundColor = ConsoleColor.Red;
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine("No *.tbl files found in the specified directory.");
+                Console.WriteLine("Please make sure you have set the correct folder.");
                 Console.ResetColor();
-                return null;
+                _logger.LogEvent("No *.tbl files found in the specified directory.", LogLevel.Error);
+                _logger.LogEvent("Please make sure you have set the correct folder.", LogLevel.Warning);
+
+                return new DataSet();
             }
 
             DataSet tblDatabase = new DataSet();
@@ -71,6 +82,7 @@ namespace KoTblDbImporter.Utlis
             foreach (string tblFile in tblFiles)
             {
                 Console.WriteLine($"File: {tblFile}");
+                _logger.LogEvent($"Currently decrypting file: {tblFile}", LogLevel.Info);
                 byte[] fileData = encryption.ProcessFile(tblFile);
 
                 encryption.LoadByteDataIntoDataSet(fileData, Path.GetFileNameWithoutExtension(tblFile), tblDatabase);
@@ -81,6 +93,7 @@ namespace KoTblDbImporter.Utlis
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine($"File {tblFile} successfully read.");
                 Console.ResetColor();
+                _logger.LogEvent($"File {tblFile} decrypted successfully.", LogLevel.Info);
             }
 
             return tblDatabase;
@@ -92,6 +105,7 @@ namespace KoTblDbImporter.Utlis
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine("Creating tables for tbl files and importing data...");
             Console.ResetColor();
+            _logger.LogEvent("Creating tables for tbl files and importing data...", LogLevel.Info);
 
             int tableCount = tblDatabase.Tables.Count;
             int tableIndex = 1;
@@ -113,6 +127,7 @@ namespace KoTblDbImporter.Utlis
             Console.WriteLine("╚" + new string('═', frameWidth) + "╝");
             Console.ResetColor();
 
+            _logger.LogEvent("Import complete.", LogLevel.Info);
         }
 
         private void CreateTableAndImportData(DataTable table, int tableIndex, int tableCount)

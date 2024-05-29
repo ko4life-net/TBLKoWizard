@@ -6,7 +6,7 @@ namespace KoTblDbImporter.DataAccess.Connections
 {
     public interface IDatabaseConnection
     {
-        bool Connect(string server = "", string dbName = "", string username = null, string password = null);
+        bool Connect(string server = "", string dbName = "", string username = "", string password = "");
         void Disconnect();
         void ExecuteQuery(string query, string comment, ConsoleColor color = ConsoleColor.Green);
         bool CreateDatabase(string databaseName);
