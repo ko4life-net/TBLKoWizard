@@ -504,7 +504,8 @@
         "112": "szRentalTransaction",
         "113": "szRentalTry",
         "114": "szRentalItem",
-        "115": "szRentalMessage"
+        "115": "szRentalMessage",
+        "116": "szRentalCount",
       },
       "UPC_DefaultLooks": {
         "0": "dwID",
