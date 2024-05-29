@@ -10,7 +10,8 @@ namespace KoTblDbImporter.Utlis
     {
         Info,
         Warning,
-        Error
+        Error,
+        Empty
     }
 
     public class EventLogger
@@ -50,12 +51,21 @@ namespace KoTblDbImporter.Utlis
                     case LogLevel.Error:
                         prefix = "ERROR";
                         break;
+                    case LogLevel.Empty:
+                        prefix = "";
+                        break;
                     default:
                         prefix = "LOG";
                         break;
                 }
-
-                string logMessage = $"{currentTime:yyyy-MM-dd HH:mm:ss} [{prefix}] - {eventName}";
+                string logMessage = "";
+                if (level != LogLevel.Empty)
+                {
+                    logMessage = $"{currentTime:yyyy-MM-dd HH:mm:ss} [{prefix}] - {eventName}";
+                } else
+                {
+                    logMessage = eventName;
+                }
 
                 using (StreamWriter writer = new StreamWriter(logFilePath, true))
                 {

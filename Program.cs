@@ -13,7 +13,7 @@ namespace KoTblDbImporter
             DateTime currentTime = DateTime.Now;
             string logFileName = $"{currentTime:yyyy-MM-dd_HH-mm-ss}.log";
             EventLogger _logger = new EventLogger("logs", logFileName);
-            _logger.LogEvent("Application started", LogLevel.Info);
+            _logger.LogEvent($"Application started: {currentTime:yyyy-MM-dd_HH-mm-ss}", LogLevel.Info);
 
             try
             {

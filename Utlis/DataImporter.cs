@@ -110,9 +110,14 @@ namespace KoTblDbImporter.Utlis
             int tableCount = tblDatabase.Tables.Count;
             int tableIndex = 1;
 
+            DateTime currentTime = DateTime.Now;
+            string logFileName = $"Database_queries_{currentTime:yyyy-MM-dd_HH-mm-ss}.log";
+
+            var insertQueryLog = new EventLogger("logs", logFileName);
+
             foreach (DataTable table in tblDatabase.Tables)
             {
-                CreateTableAndImportData(table, tableIndex, tableCount);
+                CreateTableAndImportData(table, tableIndex, tableCount, insertQueryLog);
                 tableIndex++;
             }
 
@@ -130,13 +135,15 @@ namespace KoTblDbImporter.Utlis
             _logger.LogEvent("Import complete.", LogLevel.Info);
         }
 
-        private void CreateTableAndImportData(DataTable table, int tableIndex, int tableCount)
+        private void CreateTableAndImportData(DataTable table, int tableIndex, int tableCount, EventLogger inserQueryLogger)
         {
             ProgressBar progressBarTables = new ProgressBar(0, tableCount, additionalInfo: "Processing... ");
             Console.WriteLine($"Table Name: {table.TableName}");
 
             var createTableSql = _connection.GenerateCreateTableQuery(table, table.TableName);
             _connection.ExecuteQuery(createTableSql, $"Table {table.TableName} {tableIndex} of {tableCount} created successfully");
+
+            inserQueryLogger.LogEvent(createTableSql, LogLevel.Empty);
 
             progressBarTables.Update(tableIndex);
 
@@ -146,6 +153,7 @@ namespace KoTblDbImporter.Utlis
             {
                 var insertQuery = _connection.GenerateInsertQuery(table.TableName, row);
                 _connection.ExecuteQuery(insertQuery, $"Data row {rowIndex} out of {table.Rows.Count} imported successfully");
+                inserQueryLogger.LogEvent(insertQuery, LogLevel.Empty);
                 progressBar.Update(rowIndex);
                 rowIndex++;
             }
