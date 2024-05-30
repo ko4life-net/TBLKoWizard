@@ -12,7 +12,7 @@ namespace KoTblDbImporter.Utlis
             {
                 ConnectionMethod = DatabaseType.SqlServer,
                 Server = "localhost\\SQLEXPRESS",
-                DbName = "kodb",
+                DbName = "kodb_tbl",
                 Username = "kodb_user",
                 Password = "password"
             };
