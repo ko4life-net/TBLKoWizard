@@ -2,7 +2,7 @@
 using System.Data;
 
 
-namespace KoTblDbImporter.DataAccess.Connections
+namespace TBLKoWizard.DataAccess.Connections
 {
     public interface IDatabaseConnection
     {
@@ -11,7 +11,7 @@ namespace KoTblDbImporter.DataAccess.Connections
         void ExecuteQuery(string query, string comment, ConsoleColor color = ConsoleColor.Green);
         bool CreateDatabase(string databaseName);
         bool DatabaseExists(string databaseName);
-        bool DropAllTables(string databaseName);
+        bool DropAllTables();
         bool TableVersionExists();
         bool CreateVersionTable();
         bool CreateVersionEntry(int clientVersion);
@@ -19,6 +19,9 @@ namespace KoTblDbImporter.DataAccess.Connections
         string MapDataTypeToString(Type dataType);
         string GenerateCreateTableQuery(DataTable table, string tableName);
         string GenerateInsertQuery(string tableName, DataRow row);
+        DataSet GetAllTablesToDataset();
+
+
 
     }
 }

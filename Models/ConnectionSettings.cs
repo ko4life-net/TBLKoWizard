@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace KoTblDbImporter.Models
+namespace TBLKoWizard.Models
 {
     public enum DatabaseType
     {

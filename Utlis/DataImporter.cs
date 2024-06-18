@@ -1,12 +1,12 @@
-﻿using KoTblDbImporter.DataAccess.Connections;
+﻿using TBLKoWizard.DataAccess.Connections;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using KoTblDbImporter.Encryption;
+using TBLKoWizard.Encryption;
 using System.Formats.Tar;
 using System.Reflection.Metadata.Ecma335;
 
-namespace KoTblDbImporter.Utlis
+namespace TBLKoWizard.Utlis
 {
     public class DataImporter
     {

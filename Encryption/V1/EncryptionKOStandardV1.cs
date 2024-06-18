@@ -2,7 +2,7 @@
 using System.Data;
 using System.Globalization;
 
-namespace KoTblDbImporter.Encryption.V1
+namespace TBLKoWizard.Encryption.V1
 {
     public class EncryptionKOStandardV1 : IEncryption
     {
@@ -22,24 +22,23 @@ namespace KoTblDbImporter.Encryption.V1
         }
         public void Encode(FileStream stream)
         {
-            int currentByte = stream.ReadByte();
-            uint key = 0x816;
-    
-            while (currentByte != -1)
+            uint encryptionKey = 0x0816;
+            int currentByte;
+
+            while ((currentByte = stream.ReadByte()) != -1)
             {
-                stream.Seek(-1L, SeekOrigin.Current);
-                byte byteToEncode = (byte)(currentByte & 0xff);
-                uint upperPart = key >> 8;
-                byte encodedByte = (byte)(upperPart ^ byteToEncode);
-        
-                key = (byteToEncode + key) * 0x6081 + 0x1608;
-                key &= 0xffff;
-        
-                stream.WriteByte(encodedByte);
-                currentByte = stream.ReadByte();
+                stream.Seek(-1, SeekOrigin.Current);
+
+                byte originalByte = (byte)(currentByte & 0xff);
+                uint upperPartKey = encryptionKey >> 8;
+                byte encryptedByte = (byte)(upperPartKey ^ originalByte);
+
+                encryptionKey = (encryptedByte + encryptionKey) * 0x6081 + 0x1608;
+                encryptionKey &= 0xffff;
+
+                stream.WriteByte(encryptedByte);
             }
         }
-
         public byte[] ProcessFile(string fileName)
         {
             using (var stream = new FileStream(fileName, FileMode.Open, FileAccess.Read))
@@ -55,7 +54,6 @@ namespace KoTblDbImporter.Encryption.V1
                 return buffer;
             }
         }
-
         public bool LoadByteDataIntoDataSet(byte[] fileData, string tableName, DataSet tblDatabase)
         {
             int startIndex = 0;

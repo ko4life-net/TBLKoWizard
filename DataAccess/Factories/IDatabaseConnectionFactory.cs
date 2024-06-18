@@ -1,7 +1,7 @@
-﻿using KoTblDbImporter.Models;
-using KoTblDbImporter.DataAccess.Connections;
+﻿using TBLKoWizard.Models;
+using TBLKoWizard.DataAccess.Connections;
 
-namespace KoTblDbImporter.DataAccess.Factories
+namespace TBLKoWizard.DataAccess.Factories
 {
     public interface IDatabaseConnectionFactory
     {

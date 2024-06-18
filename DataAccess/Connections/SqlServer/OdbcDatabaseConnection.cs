@@ -2,12 +2,12 @@
 using System.Data.Common;
 using System.Data;
 using System.Data.Odbc;
-using KoTblDbImporter.DataAccess.Connections;
-using KoTblDbImporter.Utlis;
+using TBLKoWizard.DataAccess.Connections;
+using TBLKoWizard.Utlis;
 using System.Text;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace KoTblDbImporter.DataAccess.Connections.ODBC
+namespace TBLKoWizard.DataAccess.Connections.ODBC
 {
     public class OdbcDatabaseConnection : IDatabaseConnection
     {
@@ -190,7 +190,7 @@ namespace KoTblDbImporter.DataAccess.Connections.ODBC
             return false;
         }
 
-        public bool DropAllTables(string databaseName)
+        public bool DropAllTables()
         {
             try
             {
@@ -390,7 +390,63 @@ namespace KoTblDbImporter.DataAccess.Connections.ODBC
             return insertQuery.ToString();
         }
 
+        public DataSet GetAllTablesToDataset()
+        {
+            DataSet dataSet = new DataSet();
+
+            try
+            {
+                if (_connection != null)
+                {
+                    if (_connection.State != ConnectionState.Open)
+                    {
+                        _connection.Open();
+                    }
+
+                    DataTable schemaTable = _connection.GetSchema("Tables");
+
+                    var tables = from DataRow row in schemaTable.Rows
+                                     where !row["TABLE_NAME"].ToString().StartsWith("sys")
+                                        && !row["TABLE_NAME"].ToString().StartsWith("trace_xe_")
+                                        && !row["TABLE_NAME"].ToString().StartsWith("_VERSION")
+                                     select row;
+
+                    foreach (DataRow row in tables)
+                    {
+                        string tableName = row["TABLE_NAME"].ToString();
 
 
+                        string query = $"SELECT * FROM [{tableName}]";
+                        using (OdbcCommand command = new OdbcCommand(query, _connection))
+                        using (OdbcDataAdapter adapter = new OdbcDataAdapter(command))
+                        {
+                            DataTable dataTable = new DataTable(tableName);
+                            adapter.Fill(dataTable);
+                            dataSet.Tables.Add(dataTable);
+                        }
+                    }
+                }
+                return dataSet;
+            }
+            catch (OdbcException ex)
+            {
+                Console.BackgroundColor = ConsoleColor.Red;
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.WriteLine($"Error loading tables: {ex.Message}");
+                Console.ResetColor();
+                _logger.LogEvent($"Error loading tables: {ex.Message}", LogLevel.Error);
+                return dataSet;
+            }
+            catch (Exception ex)
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine($"Unexpected error: {ex.Message}");
+                Console.ResetColor();
+                _logger.LogEvent($"Unexpected error: {ex.Message}", LogLevel.Error);
+                return dataSet;
+            }
+
+            return dataSet;
+        }
     }
 }

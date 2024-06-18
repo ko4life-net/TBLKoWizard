@@ -1,8 +1,8 @@
 ﻿using System;
 using System.IO;
-using KoTblDbImporter.Models;
+using TBLKoWizard.Models;
 
-namespace KoTblDbImporter.Utlis
+namespace TBLKoWizard.Utlis
 {
     public static class ConfigurationHelper
     {

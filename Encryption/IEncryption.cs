@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace KoTblDbImporter.Encryption
+namespace TBLKoWizard.Encryption
 {
     public interface IEncryption
     {

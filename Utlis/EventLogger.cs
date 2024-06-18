@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace KoTblDbImporter.Utlis
+namespace TBLKoWizard.Utlis
 {
     public enum LogLevel
     {

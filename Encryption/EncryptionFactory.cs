@@ -1,7 +1,7 @@
 ﻿using System;
-using KoTblDbImporter.Encryption.V1;
+using TBLKoWizard.Encryption.V1;
 
-namespace KoTblDbImporter.Encryption
+namespace TBLKoWizard.Encryption
 {
     public static class EncryptionFactory
     {

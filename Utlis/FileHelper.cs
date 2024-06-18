@@ -2,7 +2,7 @@
 using System.Text;
 using System.Globalization;
 
-namespace KoTblDbImporter.Utlis
+namespace TBLKoWizard.Utlis
 {
     public static class FileHelper
     {

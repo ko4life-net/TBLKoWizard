@@ -4,7 +4,7 @@ using System.Data;
 using System.IO;
 using Newtonsoft.Json;
 
-namespace KoTblDbImporter.Utlis
+namespace TBLKoWizard.Utlis
 {
     public class ColumnMapping
     {

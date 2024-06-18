@@ -4,12 +4,12 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
-using KoTblDbImporter.DataAccess.Connections;
-using KoTblDbImporter.DataAccess.Connections.ODBC;
-using KoTblDbImporter.Models;
-using KoTblDbImporter.Utlis;
+using TBLKoWizard.DataAccess.Connections;
+using TBLKoWizard.DataAccess.Connections.ODBC;
+using TBLKoWizard.Models;
+using TBLKoWizard.Utlis;
 
-namespace KoTblDbImporter.DataAccess.Factories
+namespace TBLKoWizard.DataAccess.Factories
 {
     public class DatabaseConnectionFactory : IDatabaseConnectionFactory
     {
